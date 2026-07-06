@@ -26,11 +26,52 @@
     <tbody>
         {% for key in user_all %}
         <tr>
-            <td>{{ key.username }}</td>
-            <td>{{ key.role.name }}</td>            
+            <td>
+                <form method="post" action="{{ url_for('main.edit_user', user_id=key.id) }}" class="form-inline" style="margin:0;">
+                    <span class="username-display" style="display:inline-block; min-width:140px;">{{ key.username }}</span>
+                    <input type="text" name="new_username" value="{{ key.username }}" class="form-control input-sm username-edit" style="display:none; width:140px;">
+                    <button type="button" class="btn btn-default btn-xs edit-toggle">Editar</button>
+                    <button type="submit" class="btn btn-primary btn-xs save-btn" style="display:none;">Salvar</button>
+                </form>
+            </td>
+            <td>{{ key.role.name }}</td>
+            <td>
+                <form method="post" action="{{ url_for('main.delete_user', user_id=key.id) }}" style="margin:0;">
+                    <button type="submit" class="btn btn-danger btn-xs" onclick="return confirm('Deseja realmente excluir este usuário?');">Excluir</button>
+                </form>
+            </td>
         </tr>
         {% endfor %}
     </tbody>
 </table>
 
+{% endblock %}
+
+{% block scripts %}
+{{ super() }}
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+    document.querySelectorAll('.edit-toggle').forEach(function (button) {
+        button.addEventListener('click', function () {
+            var form = this.closest('form');
+            var display = form.querySelector('.username-display');
+            var input = form.querySelector('.username-edit');
+            var saveButton = form.querySelector('.save-btn');
+
+            if (display.style.display === 'none') {
+                display.style.display = 'inline-block';
+                input.style.display = 'none';
+                saveButton.style.display = 'none';
+                this.textContent = 'Editar';
+            } else {
+                display.style.display = 'none';
+                input.style.display = 'inline-block';
+                saveButton.style.display = 'inline-block';
+                this.textContent = 'Cancelar';
+                input.focus();
+            }
+        });
+    });
+});
+</script>
 {% endblock %}

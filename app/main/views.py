@@ -1,4 +1,4 @@
-from flask import render_template, session, redirect, url_for, current_app
+from flask import render_template, session, redirect, url_for, current_app, flash, request
 from .. import db
 from ..models import User, Role
 from ..email import send_email, send_simple_message
@@ -30,4 +30,26 @@ def index():
         return redirect(url_for('.index')) # Aciona o método index() novamente, mas agora com o método GET
     return render_template('index.html',
                            form=form, name=session.get('name'),
-                           known=session.get('known', False), user_all=user_all) 
+                           known=session.get('known', False), user_all=user_all)
+
+
+@main.route('/delete_user/<int:user_id>', methods=['POST'])
+def delete_user(user_id):
+    user = User.query.get_or_404(user_id)
+    db.session.delete(user)
+    db.session.commit()
+    flash('Usuário removido com sucesso.', 'success')
+    return redirect(url_for('.index'))
+
+
+@main.route('/edit_user/<int:user_id>', methods=['POST'])
+def edit_user(user_id):
+    user = User.query.get_or_404(user_id)
+    new_username = request.form.get('new_username', '').strip()
+    if new_username:
+        user.username = new_username
+        db.session.commit()
+        flash('Nome do usuário atualizado com sucesso.', 'success')
+    else:
+        flash('Nome inválido.', 'warning')
+    return redirect(url_for('.index'))
